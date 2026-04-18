@@ -206,6 +206,18 @@
       </section>
     </main>
 
+    <!-- Right-side detail drawer -->
+    <aside id="drawer" class="drawer" aria-hidden="true">
+      <div id="drawer-backdrop" class="drawer-backdrop"></div>
+      <div class="drawer-panel">
+        <header class="drawer-header">
+          <span class="muted tiny">Initiative</span>
+          <button id="drawer-close-x" class="icon-btn" aria-label="Close">×</button>
+        </header>
+        <div id="drawer-body"></div>
+      </div>
+    </aside>
+
     <!-- Modal -->
     <div id="modal" class="modal hidden">
       <div class="modal-content">
@@ -225,6 +237,7 @@
     <script src="src/gantt.js"></script>
     <script src="src/nowNextLater.js"></script>
     <script src="src/jira.js"></script>
+    <script src="src/drawer.js"></script>
     <script src="app.js"></script>
   </body>
 </html>

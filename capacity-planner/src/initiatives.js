@@ -14,6 +14,7 @@ window.Initiatives = (function () {
       id: 'init_' + Math.random().toString(36).slice(2, 10),
       name: 'New initiative',
       description: '',
+      tags: [],
       sizeKey: (state.sizes && state.sizes[1] && state.sizes[1].key) || 'S',
       color,
       bucket: 'later',
@@ -22,6 +23,13 @@ window.Initiatives = (function () {
       jiraKey: '',
       jiraUrl: ''
     };
+  }
+
+  function normalizeTagsInput(v) {
+    return String(v || '')
+      .split(',')
+      .map((t) => t.trim())
+      .filter(Boolean);
   }
 
   function renderList(state, onChange) {
@@ -35,6 +43,9 @@ window.Initiatives = (function () {
       const jira = ini.jiraKey
         ? `<a class="jira-link" href="#" data-url="${escapeAttr(ini.jiraUrl || '')}">${escapeAttr(ini.jiraKey)} ↗</a>`
         : '<span class="muted">no epic</span>';
+      const tagChips = (ini.tags || [])
+        .map((t) => `<span class="tag-chip">${escapeHtml(t)}</span>`)
+        .join('');
       card.innerHTML = `
         <div class="top">
           <div>
@@ -47,13 +58,18 @@ window.Initiatives = (function () {
           </div>
           <input type="color" value="${ini.color}" data-action="color" />
         </div>
+        ${tagChips ? `<div class="tag-row">${tagChips}</div>` : ''}
         <div class="meta">${jira}</div>
         ${ini.description ? `<div class="muted" style="font-size:12px">${escapeHtml(ini.description)}</div>` : ''}
         <div class="row-actions">
+          <button data-action="details">Details</button>
           <button data-action="edit">Edit</button>
           <button data-action="remove" class="danger">Delete</button>
         </div>
       `;
+      card.querySelector('[data-action="details"]').addEventListener('click', () =>
+        window.Drawer?.open(state, ini.id, onChange)
+      );
       card.querySelector('[data-action="edit"]').addEventListener('click', () => openEditModal(state, ini.id, onChange));
       card.querySelector('[data-action="remove"]').addEventListener('click', () => {
         if (!confirm(`Delete "${ini.name}"?`)) return;
@@ -94,7 +110,8 @@ window.Initiatives = (function () {
       .join('');
     body.innerHTML = `
       <label>Name<input id="m-name" value="${escapeAttr(ini.name)}" /></label>
-      <label>Description<textarea id="m-desc" rows="2">${escapeHtml(ini.description || '')}</textarea></label>
+      <label>Description<textarea id="m-desc" rows="3">${escapeHtml(ini.description || '')}</textarea></label>
+      <label>Tags (comma-separated)<input id="m-tags" value="${escapeAttr((ini.tags || []).join(', '))}" placeholder="platform, infra, q3" /></label>
       <div class="form-grid">
         <label>Size<select id="m-size">${sizeOptions}</select></label>
         <label>Bucket<select id="m-bucket">${bucketOptions}</select></label>
@@ -127,6 +144,7 @@ window.Initiatives = (function () {
     document.getElementById('m-save').onclick = () => {
       ini.name = document.getElementById('m-name').value.trim() || 'Untitled';
       ini.description = document.getElementById('m-desc').value;
+      ini.tags = normalizeTagsInput(document.getElementById('m-tags').value);
       ini.sizeKey = document.getElementById('m-size').value;
       ini.bucket = document.getElementById('m-bucket').value;
       ini.start = document.getElementById('m-start').value;

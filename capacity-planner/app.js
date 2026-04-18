@@ -164,6 +164,7 @@
     bindTabs();
     bindHeaderControls();
     window.Jira.bindSettings(state, rerender);
+    if (window.Drawer) window.Drawer.bind();
 
     const { bypass } = await window.Auth.init();
     if (bypass) {

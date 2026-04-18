@@ -99,11 +99,7 @@ window.Gantt = (function () {
         bar.textContent = `${ini.name} · ${ini.sizeKey}`;
         bar.title = `${ini.name}\n${ini.start} → ${ini.end}\n${ini.sizeKey} · ${ini.bucket}${ini.jiraKey ? '\n' + ini.jiraKey : ''}`;
         bar.addEventListener('click', () => {
-          if (ini.jiraUrl && window.api?.openExternal) {
-            window.api.openExternal(ini.jiraUrl);
-          } else if (window.Initiatives) {
-            window.Initiatives.openEditModal(state, ini.id, onChange);
-          }
+          if (window.Drawer) window.Drawer.open(state, ini.id, onChange);
         });
         cells.appendChild(bar);
       }

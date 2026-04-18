@@ -34,6 +34,10 @@ window.NowNextLater = (function () {
         ev.dataTransfer.setData('text/plain', ini.id);
         ev.dataTransfer.effectAllowed = 'move';
       });
+      card.addEventListener('click', (ev) => {
+        if (ev.target.closest('.jira-link')) return;
+        window.Drawer?.open(state, ini.id, onChange);
+      });
       card.addEventListener('dblclick', () => {
         window.Initiatives.openEditModal(state, ini.id, onChange);
       });

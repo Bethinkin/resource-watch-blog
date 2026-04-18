@@ -13,12 +13,14 @@ Jira epics (fetched from the REST API) or be created manually.
 - **T-shirt sizes** — XS/S/M/L/XL defaults mapped to engineer-weeks; fully
   editable. Shows approximate calendar-week duration for the current team
   size.
-- **Initiatives** — name, description, size, color (picker), start/end dates,
-  now/next/later bucket, optional Jira epic key + URL.
+- **Initiatives** — name, description (multi-line), tags (comma-separated
+  chips), size, color (picker), start/end dates, now/next/later bucket,
+  optional Jira epic key + URL.
 - **Gantt** — weekly-resolution timeline. Each initiative renders as a
-  colored bar; click to open its Jira epic (or edit if unlinked).
+  colored bar; click to slide out a right-side details drawer (summary,
+  tags, description, timeline, Jira link, quick edit).
 - **Now / Next / Later** — three-column board with drag-and-drop between
-  buckets.
+  buckets. Click a card to open the details drawer; double-click to edit.
 - **Jira integration** — supply base URL, email, and an API token. The main
   process calls the Jira REST API (no browser CORS). One-click "Add as
   initiative" converts an epic into an initiative with the link already
