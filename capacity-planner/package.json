@@ -1,0 +1,15 @@
+{
+  "name": "capacity-planner",
+  "version": "0.1.0",
+  "description": "Desktop app for engineering capacity planning with Jira integration, t-shirt sizing, and Gantt/Now-Next-Later views.",
+  "main": "main.js",
+  "scripts": {
+    "start": "electron .",
+    "dev": "electron . --dev"
+  },
+  "keywords": ["capacity", "planning", "jira", "gantt", "electron"],
+  "license": "MIT",
+  "devDependencies": {
+    "electron": "^31.0.0"
+  }
+}

@@ -1,0 +1,192 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <title>Capacity Planner</title>
+    <link rel="stylesheet" href="styles.css" />
+  </head>
+  <body>
+    <header class="app-header">
+      <h1>Capacity Planner</h1>
+      <nav class="tabs" id="tabs">
+        <button class="tab active" data-view="engineers">Engineers</button>
+        <button class="tab" data-view="sizing">T-shirt Sizes</button>
+        <button class="tab" data-view="initiatives">Initiatives</button>
+        <button class="tab" data-view="gantt">Gantt</button>
+        <button class="tab" data-view="nnl">Now / Next / Later</button>
+        <button class="tab" data-view="jira">Jira</button>
+      </nav>
+    </header>
+
+    <main id="views">
+      <!-- Engineers -->
+      <section class="view" data-view="engineers">
+        <div class="view-header">
+          <h2>Engineer Capacity</h2>
+          <div class="actions">
+            <button id="add-engineer" class="primary">+ Add engineer</button>
+          </div>
+        </div>
+        <p class="muted">
+          Effective weekly hours = hours/week × focus factor. Available engineer-weeks over the
+          horizon drive team capacity for the planning period.
+        </p>
+
+        <div class="capacity-summary" id="capacity-summary"></div>
+
+        <div class="form-row">
+          <label>Planning horizon (weeks)
+            <input type="number" id="horizon-weeks" min="1" value="12" />
+          </label>
+          <label>Standard work-week (hrs)
+            <input type="number" id="standard-week" min="1" value="40" />
+          </label>
+        </div>
+
+        <table class="data-table" id="engineers-table">
+          <thead>
+            <tr>
+              <th>Name</th>
+              <th>Role</th>
+              <th>Hrs / week</th>
+              <th>Focus factor</th>
+              <th>PTO (wks)</th>
+              <th>Effective hrs / wk</th>
+              <th>Eng-weeks / horizon</th>
+              <th></th>
+            </tr>
+          </thead>
+          <tbody></tbody>
+        </table>
+      </section>
+
+      <!-- T-shirt sizes -->
+      <section class="view hidden" data-view="sizing">
+        <div class="view-header">
+          <h2>T-shirt Sizes</h2>
+          <div class="actions">
+            <button id="reset-sizes">Reset to defaults</button>
+          </div>
+        </div>
+        <p class="muted">
+          Each size maps to a number of <strong>engineer-weeks</strong> of effort. Use these to
+          size initiatives consistently.
+        </p>
+        <table class="data-table" id="sizes-table">
+          <thead>
+            <tr>
+              <th>Size</th>
+              <th>Engineer-weeks</th>
+              <th>≈ Calendar weeks (team of <span id="team-size-hint">—</span>)</th>
+            </tr>
+          </thead>
+          <tbody></tbody>
+        </table>
+      </section>
+
+      <!-- Initiatives -->
+      <section class="view hidden" data-view="initiatives">
+        <div class="view-header">
+          <h2>Initiatives</h2>
+          <div class="actions">
+            <button id="add-initiative" class="primary">+ Add initiative</button>
+          </div>
+        </div>
+        <p class="muted">
+          Each initiative gets a t-shirt size, color, timeline, bucket (now/next/later), and
+          optional Jira epic link.
+        </p>
+        <div id="initiatives-list" class="initiatives-list"></div>
+      </section>
+
+      <!-- Gantt -->
+      <section class="view hidden" data-view="gantt">
+        <div class="view-header">
+          <h2>Gantt Timeline</h2>
+          <div class="actions">
+            <label>Start
+              <input type="date" id="gantt-start" />
+            </label>
+            <label>Weeks
+              <input type="number" id="gantt-weeks" min="4" max="52" value="16" />
+            </label>
+          </div>
+        </div>
+        <div class="gantt-wrap">
+          <div id="gantt" class="gantt"></div>
+        </div>
+      </section>
+
+      <!-- Now / Next / Later -->
+      <section class="view hidden" data-view="nnl">
+        <div class="view-header">
+          <h2>Now / Next / Later</h2>
+        </div>
+        <div class="nnl-board">
+          <div class="nnl-col" data-bucket="now">
+            <h3>Now</h3>
+            <div class="nnl-drop" data-bucket="now"></div>
+          </div>
+          <div class="nnl-col" data-bucket="next">
+            <h3>Next</h3>
+            <div class="nnl-drop" data-bucket="next"></div>
+          </div>
+          <div class="nnl-col" data-bucket="later">
+            <h3>Later</h3>
+            <div class="nnl-drop" data-bucket="later"></div>
+          </div>
+        </div>
+      </section>
+
+      <!-- Jira -->
+      <section class="view hidden" data-view="jira">
+        <div class="view-header">
+          <h2>Jira Integration</h2>
+          <div class="actions">
+            <button id="jira-fetch" class="primary">Fetch epics</button>
+          </div>
+        </div>
+        <p class="muted">
+          Credentials stay on your machine. Use a Jira <em>API token</em> (Atlassian account
+          settings). If you skip this, you can still link epics manually on each initiative.
+        </p>
+        <div class="form-grid">
+          <label>Base URL
+            <input type="text" id="jira-base" placeholder="https://your-domain.atlassian.net" />
+          </label>
+          <label>Email
+            <input type="text" id="jira-email" placeholder="you@example.com" />
+          </label>
+          <label>API token
+            <input type="password" id="jira-token" placeholder="ATATT…" />
+          </label>
+          <label>JQL (optional)
+            <input type="text" id="jira-jql" placeholder="issuetype = Epic ORDER BY updated DESC" />
+          </label>
+        </div>
+        <div id="jira-status" class="muted"></div>
+        <div id="jira-epics" class="jira-epics"></div>
+      </section>
+    </main>
+
+    <!-- Modal -->
+    <div id="modal" class="modal hidden">
+      <div class="modal-content">
+        <header>
+          <h3 id="modal-title"></h3>
+          <button id="modal-close" class="icon-btn" aria-label="Close">×</button>
+        </header>
+        <div id="modal-body"></div>
+      </div>
+    </div>
+
+    <script src="src/storage.js"></script>
+    <script src="src/capacity.js"></script>
+    <script src="src/tshirt.js"></script>
+    <script src="src/initiatives.js"></script>
+    <script src="src/gantt.js"></script>
+    <script src="src/nowNextLater.js"></script>
+    <script src="src/jira.js"></script>
+    <script src="app.js"></script>
+  </body>
+</html>
