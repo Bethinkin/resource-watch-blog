@@ -1,4 +1,9 @@
-// Jira settings + epic browser. Credentials and fetched epics persist with the rest of state.
+// Jira settings + epic browser.
+//
+// Two modes:
+//   1. Atlassian SSO: token is already in the main process; the user picks
+//      a Jira cloud site (cloudid) from the accessible-resources list.
+//   2. Manual: base URL + email + API token (stored in state).
 window.Jira = (function () {
   function bindSettings(state, onChange) {
     const fields = {
@@ -19,30 +24,71 @@ window.Jira = (function () {
     });
   }
 
+  async function syncAtlassianSites(state) {
+    if (!window.api?.getJiraSites) return;
+    const sites = await window.api.getJiraSites();
+    state.atlassianSites = sites;
+    if (sites.length && !state.jira.cloudId) {
+      state.jira.cloudId = sites[0].id;
+    }
+    renderSiteContext(state);
+  }
+
+  function renderSiteContext(state) {
+    const host = document.getElementById('jira-status');
+    if (!host) return;
+    const sites = state.atlassianSites || [];
+    if (!sites.length) return;
+    const options = sites
+      .map((s) => `<option value="${s.id}" ${s.id === state.jira.cloudId ? 'selected' : ''}>${s.name} (${s.url})</option>`)
+      .join('');
+    host.innerHTML = `
+      <label>Atlassian site
+        <select id="jira-site">${options}</select>
+      </label>
+      <span class="muted tiny">Signed in via Atlassian SSO — API token below is ignored when a site is selected.</span>
+    `;
+    const sel = document.getElementById('jira-site');
+    if (sel) {
+      sel.addEventListener('change', () => {
+        state.jira.cloudId = sel.value;
+      });
+    }
+  }
+
   async function fetchEpics(state, onChange) {
     const status = document.getElementById('jira-status');
-    if (!state.jira?.baseUrl || !state.jira?.email || !state.jira?.token) {
-      status.textContent = 'Fill in base URL, email, and API token first.';
-      return;
-    }
     if (!window.api?.fetchJiraEpics) {
       status.textContent = 'Jira fetch is only available in the desktop app.';
       return;
     }
-    status.textContent = 'Fetching…';
+    const hasAtlassianSso = (state.atlassianSites || []).length > 0;
+    const hasManual = state.jira?.baseUrl && state.jira?.email && state.jira?.token;
+    if (!hasAtlassianSso && !hasManual) {
+      status.textContent = 'Sign in with Atlassian or fill in base URL, email, and API token first.';
+      return;
+    }
+    const note = status.querySelector('.muted, .tiny');
+    status.insertAdjacentHTML('beforeend', ' · Fetching…');
     try {
       const epics = await window.api.fetchJiraEpics({
         baseUrl: state.jira.baseUrl,
         email: state.jira.email,
         token: state.jira.token,
-        jql: state.jira.jql
+        jql: state.jira.jql,
+        cloudId: state.jira.cloudId
       });
       state.jiraEpics = epics;
-      status.textContent = `Fetched ${epics.length} epic(s).`;
+      renderSiteContext(state);
+      status.insertAdjacentText('beforeend', ` Fetched ${epics.length} epic(s).`);
       renderEpics(state);
       onChange();
     } catch (err) {
-      status.textContent = 'Error: ' + err.message;
+      renderSiteContext(state);
+      const e = document.createElement('span');
+      e.style.color = 'var(--danger)';
+      e.textContent = ' Error: ' + err.message;
+      status.appendChild(e);
     }
   }
 
@@ -85,5 +131,5 @@ window.Jira = (function () {
     return String(s || '').replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
   }
 
-  return { bindSettings, fetchEpics, renderEpics };
+  return { bindSettings, fetchEpics, renderEpics, syncAtlassianSites };
 })();

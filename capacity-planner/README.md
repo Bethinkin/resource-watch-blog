@@ -34,6 +34,54 @@ npm install
 npm start
 ```
 
+## Sign-in (SSO)
+
+On first launch the login screen offers four options. Manual works out of the
+box; the others require a one-time OAuth app registration on the provider side.
+
+Either edit `auth-config.js` directly or set env vars before launching.
+
+### Manual
+Email + password. First use of an email address creates the account. The
+password is stored as a PBKDF2-SHA256 hash (200k iterations) in
+`capacity-planner-users.json` under Electron's `userData` dir.
+
+### Google
+1. Google Cloud Console → APIs & Services → Credentials → Create OAuth client
+   ID → **Desktop app**.
+2. Copy the client ID into `auth-config.js` (`google.clientId`) or set
+   `CP_GOOGLE_CLIENT_ID`.
+3. No client secret is needed — the app uses PKCE with a loopback redirect.
+
+### Atlassian (also unlocks Jira via SSO)
+1. <https://developer.atlassian.com/console/myapps/> → Create → OAuth 2.0 (3LO).
+2. Add permissions (Jira API: read). Add callback URL
+   `http://127.0.0.1/callback` (any loopback port is accepted).
+3. Put clientId + clientSecret into `auth-config.js` (or `CP_ATLASSIAN_CLIENT_ID`
+   / `CP_ATLASSIAN_CLIENT_SECRET`).
+4. After signing in, the app fetches your accessible Jira sites from
+   `https://api.atlassian.com/oauth/token/accessible-resources`. The Jira tab
+   shows a site picker and uses the OAuth bearer token for epic fetches — the
+   manual API-token path becomes optional.
+
+### Apple
+1. Apple Developer → Identifiers → **Services ID** (e.g. `com.you.capacityplanner`).
+2. Identifiers → **Keys** → create a key with "Sign in with Apple" enabled;
+   download the `.p8`.
+3. Configure in `auth-config.js`:
+   - `serviceId` — the Services ID
+   - `teamId` — your 10-char Apple Team ID
+   - `keyId` — the Key ID from the key you created
+   - `privateKeyPath` — absolute path to the downloaded `.p8` file
+4. The app signs an ES256 client-secret JWT at runtime and completes the
+   authorization-code flow via a loopback `form_post` callback.
+
+### Session storage
+Sessions are written to `capacity-planner-session.bin` under `userData`.
+If Electron's `safeStorage` is available (macOS Keychain, Windows DPAPI,
+libsecret on Linux) the session is encrypted at rest; otherwise it falls
+back to plaintext JSON on that file.
+
 ## Jira setup
 
 1. Create an API token at <https://id.atlassian.com/manage-profile/security/api-tokens>.
@@ -62,17 +110,23 @@ summary shows utilization = planned / capacity.
 
 ```
 capacity-planner/
-  main.js          Electron main process (window, IPC, Jira HTTPS calls)
+  main.js          Electron main process (window, IPC, Jira HTTPS, auth)
   preload.js       Context bridge exposing a minimal API to the renderer
-  index.html       UI shell (tabs, views, modal)
-  styles.css       Dark theme
-  app.js           Top-level orchestration (state, tab routing, persistence)
+  index.html       UI shell (login, tabs, views, modal)
+  styles.css       Dark theme + login/user-chip styles
+  app.js           Top-level orchestration (state, auth gate, tab routing)
+  auth-config.js   OAuth client IDs / secrets for Google, Atlassian, Apple
+  auth/
+    oauth.js       PKCE + loopback server; Google + Atlassian 3LO flows
+    apple.js       Sign in with Apple (ES256 client-secret JWT, form_post)
+    manual.js      Local account store (PBKDF2-SHA256)
   src/
     storage.js     Persistence via IPC with localStorage fallback
+    auth.js        Renderer login UI + session access
     capacity.js    Capacity math + Engineers table
     tshirt.js      Size defaults + editor
     initiatives.js Card list + edit modal (color picker, Jira link fields)
     gantt.js       Weekly timeline renderer
     nowNextLater.js Drag-and-drop Now/Next/Later board
-    jira.js        Settings binding + epic list rendering
+    jira.js        Settings + site picker + epic list
 ```

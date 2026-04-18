@@ -1,11 +1,12 @@
-// Top-level app: loads state, wires tab switching, and renders the active view.
+// Top-level app: loads state, gates on auth, wires tab switching, and renders
+// the active view.
 (function () {
   const state = {
     settings: { horizonWeeks: 12, standardWeek: 40 },
     engineers: [],
     sizes: window.TShirt.defaults(),
     initiatives: [],
-    jira: { baseUrl: '', email: '', token: '', jql: '' },
+    jira: { baseUrl: '', email: '', token: '', jql: '', cloudId: '' },
     jiraEpics: []
   };
 
@@ -62,6 +63,19 @@
     });
   }
 
+  function renderUserChip() {
+    const session = window.Auth.getSession();
+    const chip = document.getElementById('user-chip');
+    if (!chip) return;
+    if (!session) {
+      chip.style.display = 'none';
+      return;
+    }
+    chip.style.display = 'flex';
+    document.getElementById('user-provider').textContent = session.provider || '';
+    document.getElementById('user-name').textContent = session.name || session.email || '';
+  }
+
   function bindHeaderControls() {
     const horizon = document.getElementById('horizon-weeks');
     const std = document.getElementById('standard-week');
@@ -113,7 +127,27 @@
       document.getElementById('modal').classList.add('hidden');
     });
 
+    const signout = document.getElementById('signout-btn');
+    if (signout) signout.addEventListener('click', () => window.Auth.signOut());
+
     document.addEventListener('cp:state-changed', () => rerender());
+    document.addEventListener('cp:auth-changed', () => applyAuthGate());
+  }
+
+  async function applyAuthGate() {
+    if (!window.Auth) {
+      window.Auth = { getSession: () => null, show: () => {}, init: async () => ({}) };
+    }
+    const session = window.Auth.getSession();
+    if (session) {
+      window.Auth.show('app');
+      renderUserChip();
+      await window.Jira.syncAtlassianSites(state);
+      renderActiveView();
+      schedulePersist();
+    } else {
+      window.Auth.show('login');
+    }
   }
 
   async function init() {
@@ -123,13 +157,21 @@
       state.engineers = saved.engineers || [];
       state.sizes = saved.sizes && saved.sizes.length ? saved.sizes : window.TShirt.defaults();
       state.initiatives = saved.initiatives || [];
-      state.jira = saved.jira || state.jira;
+      state.jira = { ...state.jira, ...(saved.jira || {}) };
       state.jiraEpics = saved.jiraEpics || [];
     }
+
     bindTabs();
     bindHeaderControls();
     window.Jira.bindSettings(state, rerender);
-    renderActiveView();
+
+    const { bypass } = await window.Auth.init();
+    if (bypass) {
+      window.Auth.show('app');
+      renderActiveView();
+      return;
+    }
+    applyAuthGate();
   }
 
   init();

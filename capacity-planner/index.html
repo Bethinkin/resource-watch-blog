@@ -6,7 +6,39 @@
     <link rel="stylesheet" href="styles.css" />
   </head>
   <body>
-    <header class="app-header">
+    <!-- Login screen shown when no session exists -->
+    <div id="login-screen" class="login-screen hidden">
+      <div class="login-card">
+        <h1>Capacity Planner</h1>
+        <p class="muted">Sign in to continue.</p>
+        <div class="sso-buttons">
+          <button class="sso sso-atlassian" data-provider="atlassian">
+            <span class="sso-icon">A</span> Continue with Atlassian
+          </button>
+          <button class="sso sso-google" data-provider="google">
+            <span class="sso-icon">G</span> Continue with Google
+          </button>
+          <button class="sso sso-apple" data-provider="apple">
+            <span class="sso-icon"></span> Continue with Apple
+          </button>
+        </div>
+        <div class="divider"><span>or</span></div>
+        <form id="manual-form" class="manual-form">
+          <label>Email<input type="email" id="manual-email" autocomplete="email" required /></label>
+          <label>Password<input type="password" id="manual-password" autocomplete="current-password" required /></label>
+          <label>Display name (new accounts)<input type="text" id="manual-name" autocomplete="name" /></label>
+          <button type="submit" class="primary">Sign in / create account</button>
+          <p class="muted tiny">
+            Manual sign-in stores a PBKDF2 hash on this machine only. First use of
+            an email creates the account.
+          </p>
+        </form>
+        <div id="login-error" class="login-error"></div>
+        <p class="muted tiny" id="sso-availability"></p>
+      </div>
+    </div>
+
+    <header class="app-header hidden" id="app-header">
       <h1>Capacity Planner</h1>
       <nav class="tabs" id="tabs">
         <button class="tab active" data-view="engineers">Engineers</button>
@@ -16,9 +48,14 @@
         <button class="tab" data-view="nnl">Now / Next / Later</button>
         <button class="tab" data-view="jira">Jira</button>
       </nav>
+      <div class="user-chip" id="user-chip">
+        <span id="user-provider" class="user-provider"></span>
+        <span id="user-name"></span>
+        <button id="signout-btn">Sign out</button>
+      </div>
     </header>
 
-    <main id="views">
+    <main id="views" class="hidden">
       <!-- Engineers -->
       <section class="view" data-view="engineers">
         <div class="view-header">
@@ -181,6 +218,7 @@
     </div>
 
     <script src="src/storage.js"></script>
+    <script src="src/auth.js"></script>
     <script src="src/capacity.js"></script>
     <script src="src/tshirt.js"></script>
     <script src="src/initiatives.js"></script>
