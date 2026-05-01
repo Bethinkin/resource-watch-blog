@@ -59,7 +59,7 @@
       <!-- Engineers -->
       <section class="view" data-view="engineers">
         <div class="view-header">
-          <h2>Engineer Capacity</h2>
+          <h2>Engineer Capacity <span class="info" tabindex="0" data-info="Each engineer has effective weekly hours = hours/week × focus factor. Multiply by available weeks (horizon − PTO) and divide by the standard work-week to get engineer-weeks of capacity. The team total is the sum.">i</span></h2>
           <div class="actions">
             <button id="add-engineer" class="primary">+ Add engineer</button>
           </div>
@@ -72,10 +72,10 @@
         <div class="capacity-summary" id="capacity-summary"></div>
 
         <div class="form-row">
-          <label>Planning horizon (weeks)
+          <label>Planning horizon (weeks) <span class="info" tabindex="0" data-info="How many weeks ahead you're planning. Capacity and utilization are computed across this window.">i</span>
             <input type="number" id="horizon-weeks" min="1" value="12" />
           </label>
-          <label>Standard work-week (hrs)
+          <label>Standard work-week (hrs) <span class="info" tabindex="0" data-info="The number of hours that counts as one engineer-week. Used to normalize part-time engineers into engineer-weeks.">i</span>
             <input type="number" id="standard-week" min="1" value="40" />
           </label>
         </div>
@@ -85,11 +85,11 @@
             <tr>
               <th>Name</th>
               <th>Role</th>
-              <th>Hrs / week</th>
-              <th>Focus factor</th>
-              <th>PTO (wks)</th>
-              <th>Effective hrs / wk</th>
-              <th>Eng-weeks / horizon</th>
+              <th>Hrs / week <span class="info" tabindex="0" data-info="Contracted hours per week. Use 20 for half-time, 40 for full-time, etc.">i</span></th>
+              <th>Focus factor <span class="info" tabindex="0" data-info="Fraction of working hours actually spent on planned engineering work, after meetings, on-call, support, interviews, etc. Typical: 0.6–0.8.">i</span></th>
+              <th>PTO (wks) <span class="info" tabindex="0" data-info="Vacation, holidays, leave that fall inside the planning horizon. Subtracted from available weeks before computing capacity.">i</span></th>
+              <th>Effective hrs / wk <span class="info" tabindex="0" data-info="Hrs/week × focus factor. The hours actually available for planned work in a typical week.">i</span></th>
+              <th>Eng-weeks / horizon <span class="info right" tabindex="0" data-info="(Horizon − PTO) × effective hrs ÷ standard work-week. The engineer's contribution to team capacity.">i</span></th>
               <th></th>
             </tr>
           </thead>
@@ -100,7 +100,7 @@
       <!-- T-shirt sizes -->
       <section class="view hidden" data-view="sizing">
         <div class="view-header">
-          <h2>T-shirt Sizes</h2>
+          <h2>T-shirt Sizes <span class="info" tabindex="0" data-info="Coarse-grained estimates that resist false precision. One number = total engineering effort in eng-weeks; calendar duration depends on how many engineers you put on it.">i</span></h2>
           <div class="actions">
             <button id="reset-sizes">Reset to defaults</button>
           </div>
@@ -112,9 +112,9 @@
         <table class="data-table" id="sizes-table">
           <thead>
             <tr>
-              <th>Size</th>
-              <th>Engineer-weeks</th>
-              <th>≈ Calendar weeks (team of <span id="team-size-hint">—</span>)</th>
+              <th>Size <span class="info" tabindex="0" data-info="The label used when sizing initiatives. Edit to use your own scale (e.g. Spike, Quarter).">i</span></th>
+              <th>Engineer-weeks <span class="info" tabindex="0" data-info="Total engineering effort in eng-weeks. Independent of how many engineers you put on the work.">i</span></th>
+              <th>≈ Calendar weeks (team of <span id="team-size-hint">—</span>) <span class="info right" tabindex="0" data-info="Eng-weeks ÷ headcount. A rough indicator of wall-clock duration if the whole team works on it. Real durations depend on staffing per initiative.">i</span></th>
             </tr>
           </thead>
           <tbody></tbody>
@@ -124,7 +124,7 @@
       <!-- Initiatives -->
       <section class="view hidden" data-view="initiatives">
         <div class="view-header">
-          <h2>Initiatives</h2>
+          <h2>Initiatives <span class="info" tabindex="0" data-info="Initiatives are the planning unit above tickets. Each is sized in eng-weeks, placed on a timeline, given a now/next/later bucket, and optionally linked to a Jira epic.">i</span></h2>
           <div class="actions">
             <button id="add-initiative" class="primary">+ Add initiative</button>
           </div>
@@ -139,12 +139,12 @@
       <!-- Gantt -->
       <section class="view hidden" data-view="gantt">
         <div class="view-header">
-          <h2>Gantt Timeline</h2>
+          <h2>Gantt Timeline <span class="info" tabindex="0" data-info="Bars span each initiative's start → end at weekly resolution. Bar color comes from the initiative. Click a bar to slide out a details drawer with description, tags, and Jira link.">i</span></h2>
           <div class="actions">
-            <label>Start
+            <label>Start <span class="info right" tabindex="0" data-info="Snapped to the Monday of the week you pick. Bars before this date are clipped to the visible range.">i</span>
               <input type="date" id="gantt-start" />
             </label>
-            <label>Weeks
+            <label>Weeks <span class="info right" tabindex="0" data-info="How many weeks to render across. Bars past this window are clipped on the right.">i</span>
               <input type="number" id="gantt-weeks" min="4" max="52" value="16" />
             </label>
           </div>
@@ -157,19 +157,19 @@
       <!-- Now / Next / Later -->
       <section class="view hidden" data-view="nnl">
         <div class="view-header">
-          <h2>Now / Next / Later</h2>
+          <h2>Now / Next / Later <span class="info" tabindex="0" data-info="A roadmap view that avoids fake dates. Drag cards between columns; the bucket is saved on the initiative and reflected on its card and in the Gantt label.">i</span></h2>
         </div>
         <div class="nnl-board">
           <div class="nnl-col" data-bucket="now">
-            <h3>Now</h3>
+            <h3>Now <span class="info" tabindex="0" data-info="In flight or starting this week. Should match the Gantt bars closest to today.">i</span></h3>
             <div class="nnl-drop" data-bucket="now"></div>
           </div>
           <div class="nnl-col" data-bucket="next">
-            <h3>Next</h3>
+            <h3>Next <span class="info" tabindex="0" data-info="Committed for the next planning slot. Confidence is moderate; dates may shift.">i</span></h3>
             <div class="nnl-drop" data-bucket="next"></div>
           </div>
           <div class="nnl-col" data-bucket="later">
-            <h3>Later</h3>
+            <h3>Later <span class="info" tabindex="0" data-info="Directionally agreed but not scheduled. Sized but no committed timeline yet.">i</span></h3>
             <div class="nnl-drop" data-bucket="later"></div>
           </div>
         </div>
@@ -178,7 +178,7 @@
       <!-- Jira -->
       <section class="view hidden" data-view="jira">
         <div class="view-header">
-          <h2>Jira Integration</h2>
+          <h2>Jira Integration <span class="info" tabindex="0" data-info="Fetch your epics so you can convert them into initiatives in one click. Two paths: sign in with Atlassian (uses an OAuth token + cloud site picker), or fill in API token credentials below.">i</span></h2>
           <div class="actions">
             <button id="jira-fetch" class="primary">Fetch epics</button>
           </div>
@@ -188,16 +188,16 @@
           settings). If you skip this, you can still link epics manually on each initiative.
         </p>
         <div class="form-grid">
-          <label>Base URL
+          <label>Base URL <span class="info" tabindex="0" data-info="Your Atlassian Cloud site URL, e.g. https://your-org.atlassian.net (no trailing /browse path).">i</span>
             <input type="text" id="jira-base" placeholder="https://your-domain.atlassian.net" />
           </label>
-          <label>Email
+          <label>Email <span class="info" tabindex="0" data-info="The Atlassian account email associated with the API token below.">i</span>
             <input type="text" id="jira-email" placeholder="you@example.com" />
           </label>
-          <label>API token
+          <label>API token <span class="info" tabindex="0" data-info="Create at id.atlassian.com → Security → API tokens. Stored locally and used as HTTP Basic auth alongside your email.">i</span>
             <input type="password" id="jira-token" placeholder="ATATT…" />
           </label>
-          <label>JQL (optional)
+          <label>JQL (optional) <span class="info right" tabindex="0" data-info="Jira Query Language filter. Default returns all epics ordered by recency. Example: project = PROJ AND issuetype = Epic AND status != Done.">i</span>
             <input type="text" id="jira-jql" placeholder="issuetype = Epic ORDER BY updated DESC" />
           </label>
         </div>
@@ -229,6 +229,7 @@
       </div>
     </div>
 
+    <script src="src/info.js"></script>
     <script src="src/storage.js"></script>
     <script src="src/auth.js"></script>
     <script src="src/capacity.js"></script>

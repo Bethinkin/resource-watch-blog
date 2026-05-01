@@ -108,19 +108,20 @@ window.Initiatives = (function () {
     const epicOptions = (state.jiraEpics || [])
       .map((e) => `<option value="${e.key}|${e.url}">${e.key} — ${e.summary}</option>`)
       .join('');
+    const i = window.info || (() => '');
     body.innerHTML = `
       <label>Name<input id="m-name" value="${escapeAttr(ini.name)}" /></label>
-      <label>Description<textarea id="m-desc" rows="3">${escapeHtml(ini.description || '')}</textarea></label>
-      <label>Tags (comma-separated)<input id="m-tags" value="${escapeAttr((ini.tags || []).join(', '))}" placeholder="platform, infra, q3" /></label>
+      <label>Description ${i('Free-form notes shown on the card and in the details drawer. Markdown is not parsed; line breaks are preserved.')}<textarea id="m-desc" rows="3">${escapeHtml(ini.description || '')}</textarea></label>
+      <label>Tags (comma-separated) ${i('Used as filter chips. Example: platform, infra, q3.')}<input id="m-tags" value="${escapeAttr((ini.tags || []).join(', '))}" placeholder="platform, infra, q3" /></label>
       <div class="form-grid">
-        <label>Size<select id="m-size">${sizeOptions}</select></label>
-        <label>Bucket<select id="m-bucket">${bucketOptions}</select></label>
+        <label>Size ${i('T-shirt size in eng-weeks. Defined on the T-shirt Sizes tab.')}<select id="m-size">${sizeOptions}</select></label>
+        <label>Bucket ${i('Now = in flight. Next = committed. Later = directional.')}<select id="m-bucket">${bucketOptions}</select></label>
         <label>Start<input type="date" id="m-start" value="${ini.start}" /></label>
         <label>End<input type="date" id="m-end" value="${ini.end}" /></label>
-        <label>Color<input type="color" id="m-color" value="${ini.color}" /></label>
-        <label>Jira epic key<input id="m-jira-key" value="${escapeAttr(ini.jiraKey || '')}" placeholder="PROJ-123" /></label>
+        <label>Color ${i('Used for the Gantt bar and the left edge of the card.')}<input type="color" id="m-color" value="${ini.color}" /></label>
+        <label>Jira epic key ${i('Issue key like PROJ-123. Shown on the card and in the drawer.')}<input id="m-jira-key" value="${escapeAttr(ini.jiraKey || '')}" placeholder="PROJ-123" /></label>
       </div>
-      <label>Jira URL<input id="m-jira-url" value="${escapeAttr(ini.jiraUrl || '')}" placeholder="https://…/browse/PROJ-123" /></label>
+      <label>Jira URL ${i('Click target for the Jira link in the drawer. Auto-filled if you pick from fetched epics below.')}<input id="m-jira-url" value="${escapeAttr(ini.jiraUrl || '')}" placeholder="https://…/browse/PROJ-123" /></label>
       ${
         epicOptions
           ? `<label>Pick from fetched epics<select id="m-epic-pick"><option value="">—</option>${epicOptions}</select></label>`

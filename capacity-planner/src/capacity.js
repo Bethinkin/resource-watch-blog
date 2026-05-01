@@ -36,12 +36,13 @@ window.Capacity = (function () {
       return sum + Number(sizeWeeks);
     }, 0);
     const util = t.totalEngWeeks > 0 ? (sized / t.totalEngWeeks) * 100 : 0;
+    const i = window.info || (() => '');
     el.innerHTML = `
-      <div class="cap-card"><div class="label">Engineers</div><div class="value">${t.headcount}</div></div>
-      <div class="cap-card"><div class="label">Horizon</div><div class="value">${t.horizon} wks</div></div>
-      <div class="cap-card"><div class="label">Capacity</div><div class="value">${t.totalEngWeeks.toFixed(1)} eng-wks</div></div>
-      <div class="cap-card"><div class="label">Planned</div><div class="value">${sized.toFixed(1)} eng-wks</div></div>
-      <div class="cap-card"><div class="label">Utilization</div><div class="value" style="color:${util > 100 ? 'var(--danger)' : util > 85 ? 'var(--warn)' : 'var(--ok)'}">${util.toFixed(0)}%</div></div>
+      <div class="cap-card"><div class="label">Engineers ${i('Total headcount in the team table below.')}</div><div class="value">${t.headcount}</div></div>
+      <div class="cap-card"><div class="label">Horizon ${i('Planning window in weeks. Configured above.')}</div><div class="value">${t.horizon} wks</div></div>
+      <div class="cap-card"><div class="label">Capacity ${i('Total available engineer-weeks across the team for this horizon.')}</div><div class="value">${t.totalEngWeeks.toFixed(1)} eng-wks</div></div>
+      <div class="cap-card"><div class="label">Planned ${i('Sum of t-shirt sizes (in eng-weeks) for all initiatives. Includes every bucket.')}</div><div class="value">${sized.toFixed(1)} eng-wks</div></div>
+      <div class="cap-card"><div class="label">Utilization ${i('Planned ÷ Capacity. Green at or below 85%, yellow 85–100%, red over 100%.', 'right')}</div><div class="value" style="color:${util > 100 ? 'var(--danger)' : util > 85 ? 'var(--warn)' : 'var(--ok)'}">${util.toFixed(0)}%</div></div>
     `;
   }
 
